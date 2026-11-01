@@ -50,41 +50,41 @@ export const createProductAction = async (values: ProductFormValues) => {
         })
         .returning();
 
-      // Insert sizes
-      const sizePrices = sizes.map(({ size, price, compareAtPrice }) => ({
-        size,
-        price,
-        compareAtPrice,
-        productSlug: product.slug,
-      }));
-      const createdSizes = await tx
-        .insert(productSizes)
-        .values(sizePrices)
-        .returning();
+      // // 1 Insert sizes
+      // const sizePrices = sizes.map(({ size, price, compareAtPrice }) => ({
+      //   size,
+      //   price,
+      //   compareAtPrice,
+      //   productSlug: product.slug,
+      // }));
+      // const createdSizes = await tx
+      //   .insert(productSizes)
+      //   .values(sizePrices)
+      //   .returning();
 
-      // insert colors
-      const productColor = colors.map(({ hex, images, key, name }) => ({
-        hex,
-        images,
-        id: key,
-        name,
-        productSlug: slug,
-      }));
-      await tx.insert(productColors).values(productColor).returning();
+      // // 2 insert colors
+      // const productColor = colors.map(({ hex, images, key, name }) => ({
+      //   hex,
+      //   images,
+      //   id: key,
+      //   name,
+      //   productSlug: slug,
+      // }));
+      // await tx.insert(productColors).values(productColor).returning();
 
-      // 4. Map variants with their corresponding size IDs
-      const sizeVariants = sizes.flatMap((size, index) =>
-        size.variants.map((variant) => ({
-          sku: variant.sku,
-          colorId: variant.colorKey,
-          sizeId: createdSizes[index].id,
-        })),
-      );
+      // // 3. Map variants with their corresponding size IDs
+      // const sizeVariants = sizes.flatMap((size, index) =>
+      //   size.variants.map((variant) => ({
+      //     sku: variant.sku,
+      //     colorId: variant.colorKey,
+      //     sizeId: createdSizes[index].id,
+      //   })),
+      // );
 
-      // 5. Insert variants
-      if (sizeVariants.length > 0) {
-        await tx.insert(productVariants).values(sizeVariants);
-      }
+      // // 5. Insert variants
+      // if (sizeVariants.length > 0) {
+      //   await tx.insert(productVariants).values(sizeVariants);
+      // }
       return { product };
     });
     return { data: data.product };

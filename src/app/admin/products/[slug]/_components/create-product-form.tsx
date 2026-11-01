@@ -19,7 +19,6 @@ import { SizesCard } from "./sizes-card";
 import { OrganizationCard } from "./organization-card";
 import { useMutation } from "@tanstack/react-query";
 import { createProductAction } from "@/action/products-action";
-import { LoadingButton } from "@/components/common/loading-button";
 
 export const emptyVariant = (colorKey: string | null = null) => ({
   colorKey,
@@ -107,16 +106,10 @@ export function CreateProductForm() {
             >
               Discard
             </Button>
-            {isPending ? (
-              <LoadingButton />
-            ) : (
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting && (
-                  <Loader2 className="animate-spin" aria-hidden />
-                )}
-                Create product
-              </Button>
-            )}
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="animate-spin" aria-hidden />}
+              Create product
+            </Button>
           </Field>
           {isSubmitted && !isValid && (
             <FieldError
