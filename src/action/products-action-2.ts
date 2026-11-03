@@ -10,52 +10,53 @@ export const createProductAction = async (
   values: z.infer<typeof productValidator>,
 ) => {
   try {
-    const validateData = productValidator.safeParse(values);
-    if (!validateData.success) {
-      return { error: "Invalid payload" };
-    }
+    // const validateData = productValidator.safeParse(values);
+    // if (!validateData.success) {
+    //   return { error: "Invalid payload" };
+    // }
 
-    const {
-      categorySlug,
-      description,
-      isVariant,
-      name,
-      shortDesc,
-      slug,
-      status,
-      subCategorySlug,
-      specification,
-      colors,
-    } = validateData.data;
-    const data = await db.transaction(async (tx) => {
-      const [product] = await tx
-        .insert(products)
-        .values({
-          categorySlug,
-          description,
-          isVariant,
-          name,
-          shortDesc,
-          slug,
-          status,
-          subCategorySlug,
-          specification,
-        })
-        .returning();
+    // const {
+    //   categorySlug,
+    //   description,
+    //   isVariant,
+    //   name,
+    //   shortDesc,
+    //   slug,
+    //   status,
+    //   subCategorySlug,
+    //   specification,
+    //   colors,
+    // } = validateData.data;
+    // const data = await db.transaction(async (tx) => {
+    //   const [product] = await tx
+    //     .insert(products)
+    //     .values({
+    //       categorySlug,
+    //       description,
+    //       isVariant,
+    //       name,
+    //       shortDesc,
+    //       slug,
+    //       status,
+    //       subCategorySlug,
+    //       specification,
+    //     })
+    //     .returning();
 
-      // 1. Add colors
-      const productColor = colors.map(({ id, images, hex, name }) => ({
-        id,
-        images,
-        hex,
-        name,
-        productSlug: product.slug,
-      }));
-      await tx.insert(productColors).values(productColor).returning();
-      return { data: product };
-    });
+    //   // 1. Add colors
+    //   const productColor = colors.map(({ id, images, hex, name }) => ({
+    //     id,
+    //     images,
+    //     hex,
+    //     name,
+    //     productSlug: product.slug,
+    //   }));
+    //   await tx.insert(productColors).values(productColor).returning();
+    //   return { data: product };
+    // });
 
-    return { data: validateData.data };
+    // return { data: validateData.data };
+    return { data: "OK" };
   } catch (error) {
     const pgError = getPgError(error);
 

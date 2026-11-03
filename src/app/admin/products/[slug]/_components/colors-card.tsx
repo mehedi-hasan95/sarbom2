@@ -135,16 +135,18 @@ export const ColorsCard = () => {
                     )}
                   />
                 </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="mt-6"
-                  aria-label={`Remove color ${i + 1}`}
-                  onClick={() => removeColor(i)}
-                >
-                  <Trash2 aria-hidden />
-                </Button>
+                {colors.fields.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="mt-6"
+                    aria-label={`Remove color ${i + 1}`}
+                    onClick={() => removeColor(i)}
+                  >
+                    <Trash2 aria-hidden />
+                  </Button>
+                )}
               </div>
             )}
 

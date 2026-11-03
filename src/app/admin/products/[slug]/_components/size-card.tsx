@@ -1,8 +1,11 @@
 "use client";
 
 import { InputController } from "@/components/form/input-controller";
+
 import { Button } from "@/components/ui/button";
+
 import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+
 import {
   Select,
   SelectContent,
@@ -10,60 +13,115 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
 import { Plus, Trash2, X } from "lucide-react";
+
 import {
   Controller,
   useFieldArray,
   useFormContext,
   useWatch,
 } from "react-hook-form";
+
 import z from "zod";
+
 import { productValidator } from "@/zod-validator/product-validator";
+
 import { ArrayError, emptyVariant } from "./create-product-form";
+
+import { CreatableComboboxController } from "@/components/form/creatable-combobox-controller";
+
+type BulkValues = {
+  price?: string;
+  salePrice?: string;
+  stock?: string;
+};
 
 export const SizeCard = ({
   index,
   canRemove,
   onRemove,
+  bulkValues = {},
 }: {
   index: number;
   canRemove: boolean;
   onRemove: () => void;
+  bulkValues?: BulkValues;
 }) => {
   const { control, formState, setValue } =
     useFormContext<z.input<typeof productValidator>>();
-  const colors = useWatch({ control, name: "colors" });
-  const used = useWatch({ control, name: `sizes.${index}.variants` });
-  const variants = useFieldArray({ control, name: `sizes.${index}.variants` });
 
-  const isVariant = useWatch({ control, name: "isVariant" });
+  const colors = useWatch({
+    control,
+    name: "colors",
+  });
+
+  const used = useWatch({
+    control,
+    name: `sizes.${index}.variants`,
+  });
+
+  const variants = useFieldArray({
+    control,
+    name: `sizes.${index}.variants`,
+  });
+
+  const isVariant = useWatch({
+    control,
+    name: "isVariant",
+  });
 
   const hasColors = colors.length > 0;
 
   const missingColors = colors.filter(
-    (c) => !used.some((v) => v.colorId === c.id),
+    (color) => !used.some((variant) => variant.colorId === color.id),
   );
 
-  // Lets Base UI resolve key -> label even when the popup is closed
-  const colorItems = colors.map((c) => ({
-    value: c.id,
-    label: c.name || c.hex || "Unnamed color",
-    hex: c.hex,
+  const colorItems = colors.map((color) => ({
+    value: color.id,
+    label: color.name || color.hex || "Unnamed color",
+    hex: color.hex,
   }));
+
+  function addMissingColors() {
+    missingColors.forEach((color) => {
+      const variant = emptyVariant({
+        colorId: color.id,
+      });
+
+      variants.append({
+        ...variant,
+        ...(bulkValues.price !== undefined && {
+          price: bulkValues.price,
+        }),
+        ...(bulkValues.salePrice !== undefined && {
+          salePrice: bulkValues.salePrice,
+        }),
+        ...(bulkValues.stock !== undefined && {
+          stock: bulkValues.stock,
+        }),
+      });
+    });
+  }
 
   return (
     <div className="space-y-4 rounded-lg border p-4">
       <div className="flex items-start gap-3">
         <div className="grid flex-1 gap-3 sm:grid-cols-3">
           {isVariant && (
-            <InputController
-              name={`sizes.${index}.size`}
+            <CreatableComboboxController
+              options={[
+                { label: "S", value: "s" },
+                { label: "M", value: "m" },
+                { label: "L", value: "l" },
+              ]}
               control={control}
-              placeholder="M"
-              title="Size"
+              name={`sizes.${index}.size`}
+              title="Select Size"
             />
           )}
         </div>
+
         {canRemove && (
           <Button
             type="button"
@@ -93,6 +151,7 @@ export const SizeCard = ({
 
                 <div className="space-y-0.5">
                   <p className="text-sm font-medium">Variant {j + 1}</p>
+
                   <p className="text-xs text-muted-foreground">
                     {hasColors && isVariant
                       ? "Color, SKU and pricing"
@@ -136,7 +195,7 @@ export const SizeCard = ({
                         name={field.name}
                         items={colorItems}
                         value={field.value || null}
-                        onValueChange={(v) => field.onChange(v ?? "")}
+                        onValueChange={(value) => field.onChange(value ?? "")}
                       >
                         <SelectTrigger
                           id={`variant-${index}-${j}-color`}
@@ -146,7 +205,7 @@ export const SizeCard = ({
                           <SelectValue placeholder="Select color">
                             {(value: string | null) => {
                               const item = colorItems.find(
-                                (i) => i.value === value,
+                                (color) => color.value === value,
                               );
 
                               if (!item) return null;
@@ -156,7 +215,9 @@ export const SizeCard = ({
                                   <span
                                     aria-hidden
                                     className="size-3 shrink-0 rounded-full border border-black/10"
-                                    style={{ backgroundColor: item.hex }}
+                                    style={{
+                                      backgroundColor: item.hex,
+                                    }}
                                   />
                                   <span className="truncate">{item.label}</span>
                                 </span>
@@ -178,7 +239,9 @@ export const SizeCard = ({
                                 <span
                                   aria-hidden
                                   className="size-3 shrink-0 rounded-full border border-black/10"
-                                  style={{ backgroundColor: item.hex }}
+                                  style={{
+                                    backgroundColor: item.hex,
+                                  }}
                                 />
                                 {item.label}
                               </span>
@@ -200,8 +263,11 @@ export const SizeCard = ({
                 control={control}
                 title="SKU"
                 placeholder="TEE-M-BLU"
-                onChange={(e) => {
-                  setValue(`sizes.${index}.variants.${j}.sku`, e.toUpperCase());
+                onChange={(value) => {
+                  setValue(
+                    `sizes.${index}.variants.${j}.sku`,
+                    value.toUpperCase(),
+                  );
                 }}
               />
 
@@ -222,6 +288,7 @@ export const SizeCard = ({
                   />
                 </>
               )}
+
               <InputController
                 control={control}
                 name={`sizes.${index}.variants.${j}.stock`}
@@ -240,13 +307,10 @@ export const SizeCard = ({
             variant="outline"
             size="sm"
             className="w-full border-dashed sm:w-auto"
-            onClick={() =>
-              missingColors.forEach((c) =>
-                variants.append(emptyVariant({ colorId: c.id })),
-              )
-            }
+            onClick={addMissingColors}
           >
             <Plus className="mr-1 size-4" aria-hidden />
+
             {missingColors.length === 1
               ? "Add missing color"
               : `Add ${missingColors.length} missing colors`}
