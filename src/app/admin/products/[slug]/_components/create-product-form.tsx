@@ -1,31 +1,36 @@
 "use client";
 
-import * as React from "react";
+import { productValidator } from "@/zod-validator/product-validator";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
-
-import { Button } from "@/components/ui/button";
-import { Field, FieldError } from "@/components/ui/field";
-import {
-  productFormSchema,
-  type ProductFormInput,
-  type ProductFormValues,
-} from "@/zod-validator/product-validator"; // adjust to where you put the validator
-import { DetailsCard } from "./details-card";
+import z from "zod";
 import { SpecificationCard } from "./specification-card";
+import { OrganizationCard } from "./organization-card";
+import { Field, FieldError } from "@/components/ui/field";
+import { Button } from "@/components/ui/button";
+import { useMutation } from "@tanstack/react-query";
+import { createProductAction } from "@/action/products-action-2";
+import { LoadingButton } from "@/components/common/loading-button";
+import { useState } from "react";
 import { ColorsCard } from "./colors-card";
 import { SizesCard } from "./sizes-card";
-import { OrganizationCard } from "./organization-card";
-import { useMutation } from "@tanstack/react-query";
-import { createProductAction } from "@/action/products-action";
+import { DetailsCard } from "./details-card";
+import { VariantCard } from "./variant-card";
 
-export const emptyVariant = (colorKey: string | null = null) => ({
+export const emptyVariant = ({
+  colorKey = null,
+  sizeKey = null,
+}: {
+  colorKey?: string | null;
+  sizeKey?: string | null;
+}) => ({
   colorKey,
+  sizeKey,
   sku: "",
+  price: undefined,
+  salePrice: undefined,
 });
 
-/** array-level errors (e.g. "Add at least one size") live on `.root` or `.message` */
 export function ArrayError({ error }: { error: unknown }) {
   const e = error as
     | { root?: { message?: string }; message?: string }
@@ -34,39 +39,36 @@ export function ArrayError({ error }: { error: unknown }) {
   if (!message) return null;
   return <FieldError errors={[{ message }]} />;
 }
+export const CreateProductForm = () => {
+  const [initialColorKey] = useState(() => crypto.randomUUID());
+  const [sizeKey] = useState(() => crypto.randomUUID());
 
-/* -------------------------------------------------------------------------- */
-/*  Main form                                                                 */
-/* -------------------------------------------------------------------------- */
-
-export function CreateProductForm() {
-  const [initialColorKey] = React.useState(() => crypto.randomUUID());
-  const form = useForm<ProductFormInput, unknown, ProductFormValues>({
-    resolver: zodResolver(productFormSchema),
-    mode: "onTouched",
+  const form = useForm<z.input<typeof productValidator>>({
+    resolver: zodResolver(productValidator),
     defaultValues: {
       name: "",
       slug: "",
       shortDesc: "",
       description: "",
+      isVariant: false,
+      price: undefined,
+      thumbnail: "",
+
+      specification: [],
+
+      status: "inactive",
       categorySlug: "",
       subCategorySlug: "",
-      status: "inactive",
-      specification: [],
-      colors: [{ key: initialColorKey, name: "", hex: "", images: [] }],
-      isVariant: false,
+      colors: [{ id: initialColorKey, name: "", hex: "", images: [] }],
       sizes: [
         {
+          id: sizeKey,
           size: "",
-          price: "",
-          compareAtPrice: "",
-          variants: [emptyVariant(initialColorKey)],
+          variants: [emptyVariant({ colorKey: initialColorKey, sizeKey })],
         },
       ],
     },
   });
-
-  const { isSubmitting, isSubmitted, isValid } = form.formState;
 
   const { mutate, isPending } = useMutation({
     mutationFn: createProductAction,
@@ -77,52 +79,42 @@ export function CreateProductForm() {
       console.log("error: ", error);
     },
   });
-  function onSubmit(data: ProductFormValues) {
-    mutate(data);
+  function onSubmit(data: z.input<typeof productValidator>) {
+    // mutate(data);
+    console.log(data);
   }
   return (
     <FormProvider {...form}>
       <form
-        id="form-create-product"
+        id="form-rhf-demo"
         onSubmit={form.handleSubmit(onSubmit)}
-        noValidate
-        className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]"
+        className="grid md:grid-cols-3 gap-5"
       >
-        <div className="space-y-6">
+        <div className="w-full md:col-span-2 space-y-6">
           <DetailsCard />
           <SpecificationCard />
+          <VariantCard />
           <ColorsCard />
           <SizesCard />
         </div>
-
-        <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
+        <div className="w-full md:col-span-1 space-y-6 lg:sticky lg:top-6 lg:self-start">
           <OrganizationCard />
           <Field orientation="horizontal">
             <Button
               type="button"
               variant="outline"
-              disabled={isSubmitting}
               onClick={() => form.reset()}
             >
               Discard
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="animate-spin" aria-hidden />}
-              Create product
-            </Button>
+            {isPending ? (
+              <LoadingButton />
+            ) : (
+              <Button type="submit">Create product</Button>
+            )}
           </Field>
-          {isSubmitted && !isValid && (
-            <FieldError
-              errors={[
-                {
-                  message:
-                    "Some fields need attention. Check the highlighted fields.",
-                },
-              ]}
-            />
-          )}
-        </aside>
+        </div>
       </form>
     </FormProvider>
   );
-}
+};

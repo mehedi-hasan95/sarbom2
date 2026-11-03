@@ -2,7 +2,6 @@ import { db } from "@/db";
 import { images } from "@/db/index.schema";
 import { getSession } from "@/lib/get-session";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
-import { UploadThingError } from "uploadthing/server";
 
 const f = createUploadthing();
 
@@ -15,6 +14,28 @@ const f = createUploadthing();
 
 export const ourFileRouter = {
   productImage: f({ image: { maxFileCount: 5, maxFileSize: "16MB" } })
+    // .middleware(() => auth())
+    .onUploadComplete(async ({ file }) => {
+      const [row] = await db
+        .insert(images)
+        .values({
+          url: file.ufsUrl,
+          key: file.key,
+        })
+        .returning({
+          id: images.id,
+          url: images.url,
+          createdAt: images.createdAt,
+        });
+
+      // this object arrives on the client as `serverData`
+      return {
+        id: row!.id,
+        url: row!.url,
+        createdAt: row!.createdAt.toISOString(),
+      };
+    }),
+  featuredImage: f({ image: { maxFileCount: 1, maxFileSize: "1MB" } })
     // .middleware(() => auth())
     .onUploadComplete(async ({ file }) => {
       const [row] = await db

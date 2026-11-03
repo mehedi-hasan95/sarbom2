@@ -1,9 +1,9 @@
 "use client";
 
-import { CreateProductForm2 } from "./_components2/create-product-form-2";
+import { CreateProductForm } from "./_components/create-product-form";
 
 const Page = () => {
-  return <CreateProductForm2 />;
+  return <CreateProductForm />;
 };
 
 export default Page;

@@ -3,14 +3,14 @@
 import { db } from "@/db";
 import { productColors, products } from "@/db/index.schema";
 import { getPgError } from "@/utils/error-handler";
-import { productValidator2 } from "@/zod-validator/product-validator2";
+import { productValidator } from "@/zod-validator/product-validator";
 import z from "zod";
 
 export const createProductAction = async (
-  values: z.infer<typeof productValidator2>,
+  values: z.infer<typeof productValidator>,
 ) => {
   try {
-    const validateData = productValidator2.safeParse(values);
+    const validateData = productValidator.safeParse(values);
     if (!validateData.success) {
       return { error: "Invalid payload" };
     }

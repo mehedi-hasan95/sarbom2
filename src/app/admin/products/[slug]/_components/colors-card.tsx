@@ -1,13 +1,11 @@
 "use client";
 
-import { ProductFormInput } from "@/zod-validator/product-validator";
 import {
   Controller,
   useFieldArray,
   useFormContext,
   useWatch,
 } from "react-hook-form";
-import { ModifyCard } from "./modify-card";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
 import {
@@ -18,23 +16,23 @@ import {
 } from "@/components/ui/field";
 import { InputController } from "@/components/form/input-controller";
 import { Input } from "@/components/ui/input";
-import { ColorImages } from "./color-images";
+import { ImageUploadController } from "@/components/form/image-upload-controller";
+import z from "zod";
+import { productValidator } from "@/zod-validator/product-validator";
+import { emptyVariant } from "./create-product-form";
+import { ModifyCard } from "./modify-card";
 
 export const ColorsCard = () => {
-  const { control, getValues, setValue } = useFormContext<ProductFormInput>();
+  const { control, getValues, setValue } =
+    useFormContext<z.infer<typeof productValidator>>();
   const colors = useFieldArray({ control, name: "colors" });
 
   const isVariant = useWatch({ control, name: "isVariant" });
 
-  const emptyVariant = (colorKey: string | null = null) => ({
-    colorKey,
-    sku: "",
-  });
-
   function addColor() {
     const hadColors = colors.fields.length > 0;
-    const key = crypto.randomUUID();
-    colors.append({ key, name: "", hex: "", images: [] });
+    const id = crypto.randomUUID();
+    colors.append({ id, name: "", hex: "", images: [] });
 
     // keep every size's variants in step with the colors list
     getValues("sizes").forEach((size, si) => {
@@ -42,10 +40,13 @@ export const ColorsCard = () => {
         // the placeholder "no color" variant becomes the first color's variant
         const only = size.variants[0];
         if (size.variants.length === 1 && only && only.colorKey === null) {
-          setValue(`sizes.${si}.variants.0.colorKey`, key);
+          setValue(`sizes.${si}.variants.0.colorKey`, id);
         }
       } else {
-        setValue(`sizes.${si}.variants`, [...size.variants, emptyVariant(key)]);
+        setValue(`sizes.${si}.variants`, [
+          ...size.variants,
+          emptyVariant({ colorKey: id }),
+        ]);
       }
     });
   }
@@ -57,8 +58,8 @@ export const ColorsCard = () => {
     colors.remove(index);
 
     getValues("sizes").forEach((size, si) => {
-      let next = size.variants.filter((v) => v.colorKey !== removed.key);
-      if (next.length === 0 && remaining === 0) next = [emptyVariant()];
+      let next = size.variants.filter((v) => v.colorKey !== removed.id);
+      if (next.length === 0 && remaining === 0) next = [emptyVariant({})];
       setValue(`sizes.${si}.variants`, next);
     });
   }
@@ -131,7 +132,15 @@ export const ColorsCard = () => {
               </div>
             )}
 
-            <ColorImages index={i} />
+            {/* <ColorImages index={i} /> */}
+            <ImageUploadController
+              control={control}
+              endpoint="productImage"
+              name={`colors.${i}.images`}
+              maxImages={5}
+              mode="multiple"
+              title="Product Images"
+            />
           </div>
         ))}
 

@@ -1,33 +1,32 @@
 "use client";
 
-import { ProductFormInput } from "@/zod-validator/product-validator";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
-import { ModifyCard } from "./modify-card";
 import { FieldGroup } from "@/components/ui/field";
-import { ArrayError } from "./create-product-form";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import z from "zod";
+import { productValidator } from "@/zod-validator/product-validator";
+import { ArrayError, emptyVariant } from "./create-product-form";
+import { ModifyCard } from "./modify-card";
 import { SizeCard } from "./size-card";
 
-const emptyVariant = (colorKey: string | null = null) => ({
-  colorKey,
-  sku: "",
-});
 export const SizesCard = () => {
-  const { control, getValues, formState } = useFormContext<ProductFormInput>();
+  const { control, getValues, formState } =
+    useFormContext<z.input<typeof productValidator>>();
   const sizes = useFieldArray({ control, name: "sizes" });
 
   const isVariant = useWatch({ control, name: "isVariant" });
 
+  const id = crypto.randomUUID();
+
   function addSize() {
     const colors = getValues("colors");
     sizes.append({
+      id,
       size: "",
-      price: "",
-      compareAtPrice: "",
       variants: colors.length
-        ? colors.map((c) => emptyVariant(c.key))
-        : [emptyVariant()],
+        ? colors.map((c) => emptyVariant({ colorKey: c.id }))
+        : [emptyVariant({})],
     });
   }
   return (

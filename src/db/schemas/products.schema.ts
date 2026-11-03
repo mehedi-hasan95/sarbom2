@@ -55,6 +55,8 @@ export const products = snakeCase.table(
     shortDesc: varchar({ length: 200 }).notNull(),
     description: text().notNull(),
     specification: jsonb().$type<SPECIFICATION>(),
+    thumbnail: text().references(() => images.url, { onDelete: "cascade" }),
+    price: numeric({ precision: 12, scale: 2 }),
     categorySlug: text()
       .notNull()
       .references(() => categories.slug, {
@@ -94,7 +96,6 @@ export const productSizes = snakeCase.table(
         onUpdate: "cascade",
       }),
     size: text(), // "S", "M", "XL" or null
-    price: numeric({ precision: 12, scale: 2 }).notNull(),
     compareAtPrice: numeric({ precision: 12, scale: 2 }),
   },
   (t) => [
@@ -147,6 +148,8 @@ export const productVariants = snakeCase.table(
       onDelete: "cascade",
     }), // null = product has no colors
     sku: text().unique(), // multiple nulls allowed in Postgres
+
+    price: numeric({ precision: 12, scale: 2 }),
   },
   (t) => [
     unique("product_variants_unique")

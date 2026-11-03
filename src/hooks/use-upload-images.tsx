@@ -5,13 +5,15 @@ import { toast } from "sonner";
 import { useUploadThing } from "@/utils/uploadthing";
 import { prependImages } from "../transtack-options/image-query";
 import { useState } from "react";
+import { OurFileRouter } from "@/app/api/uploadthing/core";
 
-export function useUploadImages() {
+type Endpoint = keyof OurFileRouter;
+export function useUploadImages(endPoint: Endpoint) {
   const queryClient = useQueryClient();
   // overall progress of the current batch, 0-100
   const [progress, setProgress] = useState(0);
 
-  const { startUpload } = useUploadThing("productImage", {
+  const { startUpload } = useUploadThing(endPoint, {
     onUploadProgress: (p) => setProgress(Math.round(p)),
   });
 

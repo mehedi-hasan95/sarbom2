@@ -1,0 +1,36 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "583ac2c5-b795-4561-b437-071fcf7a8ee7",
+  "prevIds": [
+    "e0feb45f-d4be-4c46-baef-34d131049f25"
+  ],
+  "footprints": [
+    {
+      "statementType": "drop_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "product_colors"
+      ],
+      "writes": [
+        "s|fk|public.product_colors.product_colors_images_images_url_fkey",
+        "n|fk|public.product_colors.product_colors_images_images_url_fkey",
+        "e|fk|public.product_colors.product_colors_images_images_url_fkey",
+        "n|con|public.product_colors.product_colors_images_images_url_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.product_colors",
+        "n|sch|public",
+        "e|col|public.product_colors.images"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "drop",
+      "key": "fks\u0000[\"public\",\"product_colors\",\"product_colors_images_images_url_fkey\"]"
+    }
+  ]
+}

@@ -1,15 +1,16 @@
 "use client";
 
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
-import { ModifyCard } from "./modify-card";
-import { ProductFormInput } from "@/zod-validator/product-validator";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
 import { FieldGroup } from "@/components/ui/field";
 import { InputController } from "@/components/form/input-controller";
+import { ModifyCard } from "./modify-card";
+import z from "zod";
+import { productValidator } from "@/zod-validator/product-validator";
 
 export const SpecificationCard = () => {
-  const { control } = useFormContext<ProductFormInput>();
+  const { control } = useFormContext<z.infer<typeof productValidator>>();
   const rows = useFieldArray({ control, name: "specification" });
 
   const sp = useWatch({ control: control, name: "specification" });

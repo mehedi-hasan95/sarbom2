@@ -2,16 +2,18 @@
 
 import { FieldGroup } from "@/components/ui/field";
 
-import { ProductFormInput } from "@/zod-validator/product-validator";
 import { useFormContext } from "react-hook-form";
-import { ModifyCard } from "./modify-card";
 import { InputController } from "@/components/form/input-controller";
 import { TextareaController } from "@/components/form/textarea-controller";
 import { slugify } from "@/lib/utils";
 import { SwitchController } from "@/components/form/switch-controller";
+import { ModifyCard } from "./modify-card";
+import z from "zod";
+import { productValidator } from "@/zod-validator/product-validator";
 
 export const DetailsCard = () => {
-  const { control, setValue, formState } = useFormContext<ProductFormInput>();
+  const { control, setValue, formState } =
+    useFormContext<z.infer<typeof productValidator>>();
   return (
     <ModifyCard
       title="Product details"
@@ -39,6 +41,13 @@ export const DetailsCard = () => {
           placeholder="classic-tee"
         />
 
+        <InputController
+          control={control}
+          name="price"
+          title="Price"
+          placeholder="e.g. 20.00"
+        />
+
         <TextareaController
           control={control}
           name="shortDesc"
@@ -48,12 +57,6 @@ export const DetailsCard = () => {
         />
 
         <TextareaController control={control} name="description" />
-
-        <SwitchController
-          control={control}
-          name="isVariant"
-          title="Is this variant product?"
-        />
       </FieldGroup>
     </ModifyCard>
   );

@@ -1,0 +1,1 @@
+ALTER TABLE "product_colors" DROP CONSTRAINT "product_colors_images_images_url_fkey";

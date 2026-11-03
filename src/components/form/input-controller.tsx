@@ -32,7 +32,10 @@ export const InputController = <T extends FieldValues>({
       control={control}
       render={({ field, fieldState }) => (
         <Field data-invalid={fieldState.invalid} className="flex-1">
-          <FieldLabel htmlFor={name} className={cn(hideTitle && "sr-only")}>
+          <FieldLabel
+            htmlFor={name}
+            className={cn(hideTitle && "sr-only", className)}
+          >
             {title}
           </FieldLabel>
           <Input
@@ -41,7 +44,7 @@ export const InputController = <T extends FieldValues>({
             aria-invalid={fieldState.invalid}
             placeholder={placeholder}
             type={inputTypes}
-            className={cn("", className)}
+            // className={cn("", className)}
             disabled={disabled}
             value={field.value ?? ""}
             onChange={(e) => {

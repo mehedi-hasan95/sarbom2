@@ -1,10 +1,8 @@
-import z, { ZodType } from "zod";
+import z from "zod";
 import { createInsertSchema } from "drizzle-orm/zod";
 import {
   categories,
-  products,
-  // productSizes,
-  // sizeColors,
+  // products,
   subCategories,
 } from "@/db/index.schema";
 
@@ -24,11 +22,11 @@ export const slugSchema = z
  *  - a single string (only one value appended)
  *  - a string[] (multiple values appended)
  */
-export const formArray = <T extends ZodType>(schema: T) =>
-  z.preprocess((val) => {
-    if (val === undefined || val === null || val === "") return undefined;
-    return Array.isArray(val) ? val : [val];
-  }, schema);
+// export const formArray = <T extends ZodType>(schema: T) =>
+//   z.preprocess((val) => {
+//     if (val === undefined || val === null || val === "") return undefined;
+//     return Array.isArray(val) ? val : [val];
+//   }, schema);
 
 export const specificationValidator = z.object({
   specification: z
@@ -55,11 +53,11 @@ export const categoryValidator = createInsertSchema(categories, {
   slug: slugSchema,
 });
 
-export const productsValidator = createInsertSchema(products, {
-  slug: slugSchema,
-  categorySlug: slugSchema,
-  specification: specificationValidator.shape.specification.optional(),
-});
+// export const productsValidator = createInsertSchema(products, {
+//   slug: slugSchema,
+//   categorySlug: slugSchema,
+//   specification: specificationValidator.shape.specification.optional(),
+// });
 
 // export const productSizeValidator = createInsertSchema(productSizes, {
 //   price: z.coerce.number().nonnegative(),

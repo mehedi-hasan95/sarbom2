@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ProductFormInput } from "@/zod-validator/product-validator";
 import { Plus, Trash2, X } from "lucide-react";
 import {
   Controller,
@@ -18,8 +17,9 @@ import {
   useFormContext,
   useWatch,
 } from "react-hook-form";
+import z from "zod";
+import { productValidator } from "@/zod-validator/product-validator";
 import { ArrayError, emptyVariant } from "./create-product-form";
-import { Input } from "@/components/ui/input";
 
 export const SizeCard = ({
   index,
@@ -30,7 +30,8 @@ export const SizeCard = ({
   canRemove: boolean;
   onRemove: () => void;
 }) => {
-  const { control, formState } = useFormContext<ProductFormInput>();
+  const { control, formState, setValue } =
+    useFormContext<z.input<typeof productValidator>>();
   const colors = useWatch({ control, name: "colors" });
   const used = useWatch({ control, name: `sizes.${index}.variants` });
   const variants = useFieldArray({ control, name: `sizes.${index}.variants` });
@@ -40,12 +41,12 @@ export const SizeCard = ({
   const hasColors = colors.length > 0;
 
   const missingColors = colors.filter(
-    (c) => !used.some((v) => v.colorKey === c.key),
+    (c) => !used.some((v) => v.colorKey === c.id),
   );
 
   // Lets Base UI resolve key -> label even when the popup is closed
   const colorItems = colors.map((c) => ({
-    value: c.key,
+    value: c.id,
     label: c.name || c.hex || "Unnamed color",
     hex: c.hex,
   }));
@@ -62,20 +63,6 @@ export const SizeCard = ({
               title="Size"
             />
           )}
-
-          <InputController
-            name={`sizes.${index}.price`}
-            control={control}
-            placeholder="20.00"
-            title="Price"
-          />
-
-          <InputController
-            name={`sizes.${index}.compareAtPrice`}
-            control={control}
-            placeholder="25.00"
-            title="Compare-at price"
-          />
         </div>
         {canRemove && (
           <Button
@@ -91,127 +78,149 @@ export const SizeCard = ({
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {variants.fields.map((variant, j) => (
           <div
             key={variant.id}
-            className={
-              hasColors
-                ? "grid items-start gap-3 sm:grid-cols-[1.2fr_1fr_6.5rem_auto]"
-                : "grid items-start gap-3 sm:grid-cols-[1fr_6.5rem_auto]"
-            }
+            className="group relative rounded-xl border bg-card transition-colors hover:border-foreground/20"
           >
-            {hasColors && isVariant && (
-              <Controller
-                name={`sizes.${index}.variants.${j}.colorKey`}
-                control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel
-                      htmlFor={`variant-${index}-${j}-color`}
-                      className={j > 0 ? "sm:sr-only" : undefined}
-                    >
-                      Color
-                    </FieldLabel>
-                    <Select
-                      name={field.name}
-                      items={colorItems}
-                      value={field.value || null}
-                      onValueChange={(v) => field.onChange(v ?? "")}
-                    >
-                      <SelectTrigger
-                        id={`variant-${index}-${j}-color`}
-                        aria-invalid={fieldState.invalid}
-                        className="w-full"
+            {/* Variant header */}
+            <div className="flex items-center justify-between border-b bg-muted/30 px-4 py-3">
+              <div className="flex items-center gap-3">
+                <div className="flex size-8 items-center justify-center rounded-lg border bg-background text-sm font-semibold text-muted-foreground">
+                  {j + 1}
+                </div>
+
+                <div className="space-y-0.5">
+                  <p className="text-sm font-medium">Variant {j + 1}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {hasColors && isVariant
+                      ? "Color, SKU and pricing"
+                      : "SKU and pricing"}
+                  </p>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                aria-label={`Remove variant ${j + 1}`}
+                disabled={variants.fields.length === 1}
+                onClick={() => variants.remove(j)}
+              >
+                <X className="size-4" aria-hidden />
+              </Button>
+            </div>
+
+            {/* Variant fields */}
+            <div
+              className={
+                hasColors && isVariant
+                  ? "grid gap-4 p-4 sm:grid-cols-2 xl:grid-cols-4"
+                  : "grid gap-4 p-4 sm:grid-cols-2"
+              }
+            >
+              {hasColors && isVariant && (
+                <Controller
+                  name={`sizes.${index}.variants.${j}.colorKey`}
+                  control={control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel htmlFor={`variant-${index}-${j}-color`}>
+                        Color
+                      </FieldLabel>
+
+                      <Select
+                        name={field.name}
+                        items={colorItems}
+                        value={field.value || null}
+                        onValueChange={(v) => field.onChange(v ?? "")}
                       >
-                        <SelectValue placeholder="Select a color">
-                          {(value: string | null) => {
-                            const item = colorItems.find(
-                              (i) => i.value === value,
-                            );
-                            if (!item) return null;
-                            return (
+                        <SelectTrigger
+                          id={`variant-${index}-${j}-color`}
+                          aria-invalid={fieldState.invalid}
+                          className="w-full bg-background"
+                        >
+                          <SelectValue placeholder="Select color">
+                            {(value: string | null) => {
+                              const item = colorItems.find(
+                                (i) => i.value === value,
+                              );
+
+                              if (!item) return null;
+
+                              return (
+                                <span className="flex items-center gap-2">
+                                  <span
+                                    aria-hidden
+                                    className="size-3 shrink-0 rounded-full border border-black/10"
+                                    style={{ backgroundColor: item.hex }}
+                                  />
+                                  <span className="truncate">{item.label}</span>
+                                </span>
+                              );
+                            }}
+                          </SelectValue>
+                        </SelectTrigger>
+
+                        <SelectContent>
+                          {colorItems.map((item) => (
+                            <SelectItem
+                              key={item.value}
+                              value={item.value}
+                              disabled={used.some(
+                                (u, k) => k !== j && u.colorKey === item.value,
+                              )}
+                            >
                               <span className="flex items-center gap-2">
                                 <span
                                   aria-hidden
-                                  className="size-3 rounded-full border"
+                                  className="size-3 shrink-0 rounded-full border border-black/10"
                                   style={{ backgroundColor: item.hex }}
                                 />
                                 {item.label}
                               </span>
-                            );
-                          }}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {colorItems.map((item) => (
-                          <SelectItem
-                            key={item.value}
-                            value={item.value}
-                            disabled={used.some(
-                              (u, k) => k !== j && u.colorKey === item.value,
-                            )}
-                          >
-                            <span className="flex items-center gap-2">
-                              <span
-                                aria-hidden
-                                className="size-3 rounded-full border"
-                                style={{ backgroundColor: item.hex }}
-                              />
-                              {item.label}
-                            </span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-            )}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
 
-            <Controller
-              name={`sizes.${index}.variants.${j}.sku`}
-              control={control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel
-                    htmlFor={`variant-${index}-${j}-sku`}
-                    className={j > 0 ? "sm:sr-only" : undefined}
-                  >
-                    SKU
-                  </FieldLabel>
-                  <Input
-                    {...field}
-                    id={`variant-${index}-${j}-sku`}
-                    aria-invalid={fieldState.invalid}
-                    placeholder="TEE-M-BLU"
-                    className="font-mono"
-                    autoComplete="off"
-                    onChange={(e) =>
-                      field.onChange(e.target.value.toUpperCase())
-                    }
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
                   )}
-                </Field>
+                />
               )}
-            />
 
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className={j === 0 ? "sm:mt-6" : undefined}
-              aria-label="Remove variant"
-              disabled={variants.fields.length === 1}
-              onClick={() => variants.remove(j)}
-            >
-              <X aria-hidden />
-            </Button>
+              <InputController
+                name={`sizes.${index}.variants.${j}.sku`}
+                control={control}
+                title="SKU"
+                placeholder="TEE-M-BLU"
+                onChange={(e) => {
+                  setValue(`sizes.${index}.variants.${j}.sku`, e.toUpperCase());
+                }}
+              />
+
+              {isVariant && (
+                <>
+                  <InputController
+                    control={control}
+                    name={`sizes.${index}.variants.${j}.price`}
+                    title="Regular price"
+                  />
+
+                  <InputController
+                    control={control}
+                    name={`sizes.${index}.variants.${j}.salePrice`}
+                    title="Sale price"
+                  />
+                </>
+              )}
+            </div>
           </div>
         ))}
 
@@ -222,11 +231,14 @@ export const SizeCard = ({
             type="button"
             variant="outline"
             size="sm"
+            className="w-full border-dashed sm:w-auto"
             onClick={() =>
-              missingColors.forEach((c) => variants.append(emptyVariant(c.key)))
+              missingColors.forEach((c) =>
+                variants.append(emptyVariant({ colorKey: c.id })),
+              )
             }
           >
-            <Plus aria-hidden />
+            <Plus className="mr-1 size-4" aria-hidden />
             {missingColors.length === 1
               ? "Add missing color"
               : `Add ${missingColors.length} missing colors`}

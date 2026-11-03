@@ -1,19 +1,18 @@
 "use client";
 
 import { FieldGroup } from "@/components/ui/field";
-import { ModifyCard } from "./modify-card";
 import { useFormContext, useWatch } from "react-hook-form";
-import { ProductFormInput } from "@/zod-validator/product-validator";
 import { ComboboxController } from "@/components/form/combobox-controller";
-import {
-  useGetCategories,
-  useGetSubCategories,
-} from "@/hooks/categories/use-categories";
+import { useGetCategories } from "@/hooks/categories/use-categories";
 import { useQuery } from "@tanstack/react-query";
 import { getSubCategoriesOptions } from "@/transtack-options/category-data";
+import { ModifyCard } from "./modify-card";
+import z from "zod";
+import { productValidator } from "@/zod-validator/product-validator";
+import { ImageUploadController } from "@/components/form/image-upload-controller";
 
 export const OrganizationCard = () => {
-  const { control, setValue } = useFormContext<ProductFormInput>();
+  const { control } = useFormContext<z.infer<typeof productValidator>>();
   const categorySlug = useWatch({ control, name: "categorySlug" });
   const { data: categories } = useGetCategories();
   const { data: subCategories } = useQuery(
@@ -56,6 +55,14 @@ export const OrganizationCard = () => {
           title="Category"
           placeholder="Select Category"
           disabled={!categorySlug}
+        />
+
+        <ImageUploadController
+          control={control}
+          name="thumbnail"
+          endpoint="featuredImage"
+          mode="single"
+          title="Thumbnail Images"
         />
       </FieldGroup>
     </ModifyCard>
