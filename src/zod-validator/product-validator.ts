@@ -11,7 +11,7 @@ export const productValidator = z
     description: z.string().min(1),
     isVariant: z.boolean(),
     name: z.string().min(1),
-    shortDesc: z.string().min(10).max(200),
+    shortDesc: z.string().max(200).optional(),
     slug: z
       .string()
       .regex(SLUG_REGEX, "Lowercase letters, numbers and single hyphens only")
@@ -23,6 +23,14 @@ export const productValidator = z
       (val) => (val === "" || val === null ? undefined : val),
       z.coerce.number().nonnegative(),
     ),
+    salePrice: z.preprocess((val) => {
+      if (val === "" || val === null || val === undefined) {
+        return undefined;
+      }
+
+      return val;
+    }, z.coerce.number().nonnegative().optional()),
+    tags: z.array(z.string()).optional(),
     specification: z
       .array(
         z.object({
@@ -71,8 +79,8 @@ export const productValidator = z
                 .max(64, "SKU is too long")
                 .regex(SKU_REGEX, "Use A-Z, 0-9 and hyphens, e.g. TEE-M-BLU"),
             ]),
-            colorKey: z.string().min(1).nullable(),
-            sizeKey: z.string().min(1).nullable(),
+            colorId: z.string().min(1).nullable(),
+            sizeId: z.string().min(1).nullable(),
             price: z.preprocess((val) => {
               if (val === "" || val === null || val === undefined) {
                 return undefined;
@@ -80,8 +88,20 @@ export const productValidator = z
 
               return val;
             }, z.coerce.number().nonnegative().optional()),
-            // price: z.coerce.number().int().nonnegative().optional(),
-            salePrice: z.coerce.number().int().nonnegative().optional(),
+            salePrice: z.preprocess((val) => {
+              if (val === "" || val === null || val === undefined) {
+                return undefined;
+              }
+
+              return val;
+            }, z.coerce.number().nonnegative().optional()),
+            stock: z.preprocess((val) => {
+              if (val === "" || val === null || val === undefined) {
+                return undefined;
+              }
+
+              return val;
+            }, z.coerce.number().nonnegative().optional()),
           }),
         ),
       }),
@@ -114,6 +134,9 @@ export const productValidator = z
         }
       });
       data.sizes.forEach((size, i) => {
+        if (!size.size?.trim()) {
+          issue(["sizes", i, "size"], "Size is required");
+        }
         size.variants.forEach((variant, j) => {
           if (
             variant.price === undefined ||

@@ -2,7 +2,7 @@
 
 import { productValidator } from "@/zod-validator/product-validator";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import z from "zod";
 import { SpecificationCard } from "./specification-card";
 import { OrganizationCard } from "./organization-card";
@@ -11,24 +11,25 @@ import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
 import { createProductAction } from "@/action/products-action-2";
 import { LoadingButton } from "@/components/common/loading-button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ColorsCard } from "./colors-card";
 import { SizesCard } from "./sizes-card";
 import { DetailsCard } from "./details-card";
 import { VariantCard } from "./variant-card";
 
 export const emptyVariant = ({
-  colorKey = null,
-  sizeKey = null,
+  colorId = null,
+  sizeId = null,
 }: {
-  colorKey?: string | null;
-  sizeKey?: string | null;
+  colorId?: string | null;
+  sizeId?: string | null;
 }) => ({
-  colorKey,
-  sizeKey,
+  colorId,
+  sizeId,
   sku: "",
   price: undefined,
   salePrice: undefined,
+  stock: undefined,
 });
 
 export function ArrayError({ error }: { error: unknown }) {
@@ -40,8 +41,8 @@ export function ArrayError({ error }: { error: unknown }) {
   return <FieldError errors={[{ message }]} />;
 }
 export const CreateProductForm = () => {
-  const [initialColorKey] = useState(() => crypto.randomUUID());
-  const [sizeKey] = useState(() => crypto.randomUUID());
+  const [colorId] = useState(() => crypto.randomUUID());
+  const [sizeId] = useState(() => crypto.randomUUID());
 
   const form = useForm<z.input<typeof productValidator>>({
     resolver: zodResolver(productValidator),
@@ -52,23 +53,62 @@ export const CreateProductForm = () => {
       description: "",
       isVariant: false,
       price: undefined,
+      salePrice: undefined,
+
       thumbnail: "",
 
       specification: [],
+      tags: [],
 
       status: "inactive",
       categorySlug: "",
       subCategorySlug: "",
-      colors: [{ id: initialColorKey, name: "", hex: "", images: [] }],
+      colors: [{ id: colorId, name: "", hex: "", images: [] }],
       sizes: [
         {
-          id: sizeKey,
+          id: sizeId,
           size: "",
-          variants: [emptyVariant({ colorKey: initialColorKey, sizeKey })],
+          variants: [emptyVariant({ colorId: colorId, sizeId })],
         },
       ],
     },
   });
+
+  const isVariant = useWatch({ control: form.control, name: "isVariant" });
+
+  // Watch for changes in isVariant and clear/reset colors and sizes
+  useEffect(() => {
+    if (!isVariant) {
+      // Clear colors and sizes when isVariant is false
+      form.setValue("colors", [{ id: colorId, name: "", hex: "", images: [] }]);
+      form.setValue("sizes", [
+        {
+          id: sizeId,
+          size: "",
+          variants: [emptyVariant({ colorId: colorId, sizeId })],
+        },
+      ]);
+    } else {
+      // Restore initial colors and sizes if switched back to true and they are empty
+      const currentColor = form.getValues("colors");
+      const currentSizes = form.getValues("sizes");
+
+      if (!currentColor || currentColor.length === 0) {
+        form.setValue("colors", [
+          { id: colorId, name: "", hex: "", images: [] },
+        ]);
+      }
+      if (!currentSizes || currentSizes.length === 0) {
+        form.setValue("sizes", [
+          {
+            id: sizeId,
+            size: "",
+            variants: [emptyVariant({ colorId: colorId, sizeId })],
+          },
+        ]);
+      }
+    }
+  }, [isVariant, form, colorId, sizeId]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: createProductAction,

@@ -41,12 +41,21 @@ export const DetailsCard = () => {
           placeholder="classic-tee"
         />
 
-        <InputController
-          control={control}
-          name="price"
-          title="Price"
-          placeholder="e.g. 20.00"
-        />
+        <div className="grid md:grid-cols-2 gap-5">
+          <InputController
+            control={control}
+            name="price"
+            title="Price"
+            placeholder="e.g. 20.00"
+          />
+
+          <InputController
+            control={control}
+            name="salePrice"
+            title="Sale Price"
+            placeholder="e.g. 20.00"
+          />
+        </div>
 
         <TextareaController
           control={control}

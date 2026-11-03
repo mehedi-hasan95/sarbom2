@@ -41,7 +41,7 @@ export const SizeCard = ({
   const hasColors = colors.length > 0;
 
   const missingColors = colors.filter(
-    (c) => !used.some((v) => v.colorKey === c.id),
+    (c) => !used.some((v) => v.colorId === c.id),
   );
 
   // Lets Base UI resolve key -> label even when the popup is closed
@@ -118,13 +118,13 @@ export const SizeCard = ({
             <div
               className={
                 hasColors && isVariant
-                  ? "grid gap-4 p-4 sm:grid-cols-2 xl:grid-cols-4"
+                  ? "grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-5"
                   : "grid gap-4 p-4 sm:grid-cols-2"
               }
             >
               {hasColors && isVariant && (
                 <Controller
-                  name={`sizes.${index}.variants.${j}.colorKey`}
+                  name={`sizes.${index}.variants.${j}.colorId`}
                   control={control}
                   render={({ field, fieldState }) => (
                     <Field data-invalid={fieldState.invalid}>
@@ -171,7 +171,7 @@ export const SizeCard = ({
                               key={item.value}
                               value={item.value}
                               disabled={used.some(
-                                (u, k) => k !== j && u.colorKey === item.value,
+                                (u, k) => k !== j && u.colorId === item.value,
                               )}
                             >
                               <span className="flex items-center gap-2">
@@ -211,15 +211,23 @@ export const SizeCard = ({
                     control={control}
                     name={`sizes.${index}.variants.${j}.price`}
                     title="Regular price"
+                    placeholder="e.g. 10.00"
                   />
 
                   <InputController
                     control={control}
                     name={`sizes.${index}.variants.${j}.salePrice`}
                     title="Sale price"
+                    placeholder="e.g. 15.00"
                   />
                 </>
               )}
+              <InputController
+                control={control}
+                name={`sizes.${index}.variants.${j}.stock`}
+                title="Product Stock"
+                placeholder="e.g. 100"
+              />
             </div>
           </div>
         ))}
@@ -234,7 +242,7 @@ export const SizeCard = ({
             className="w-full border-dashed sm:w-auto"
             onClick={() =>
               missingColors.forEach((c) =>
-                variants.append(emptyVariant({ colorKey: c.id })),
+                variants.append(emptyVariant({ colorId: c.id })),
               )
             }
           >

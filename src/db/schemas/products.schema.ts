@@ -1,6 +1,7 @@
 import {
   boolean,
   index,
+  integer,
   jsonb,
   numeric,
   pgEnum,
@@ -57,6 +58,8 @@ export const products = snakeCase.table(
     specification: jsonb().$type<SPECIFICATION>(),
     thumbnail: text().references(() => images.url, { onDelete: "cascade" }),
     price: numeric({ precision: 12, scale: 2 }),
+    salePrice: numeric({ precision: 12, scale: 2 }),
+    tags: text().array(),
     categorySlug: text()
       .notNull()
       .references(() => categories.slug, {
@@ -96,7 +99,6 @@ export const productSizes = snakeCase.table(
         onUpdate: "cascade",
       }),
     size: text(), // "S", "M", "XL" or null
-    compareAtPrice: numeric({ precision: 12, scale: 2 }),
   },
   (t) => [
     unique("product_sizes_unique").on(t.productSlug, t.size).nullsNotDistinct(),
@@ -146,10 +148,12 @@ export const productVariants = snakeCase.table(
       .references(() => productSizes.id, { onDelete: "cascade" }),
     colorId: uuid().references(() => productColors.id, {
       onDelete: "cascade",
-    }), // null = product has no colors
-    sku: text().unique(), // multiple nulls allowed in Postgres
+    }),
+    sku: text().unique(),
 
     price: numeric({ precision: 12, scale: 2 }),
+    salePrice: numeric({ precision: 12, scale: 2 }),
+    stock: integer(),
   },
   (t) => [
     unique("product_variants_unique")

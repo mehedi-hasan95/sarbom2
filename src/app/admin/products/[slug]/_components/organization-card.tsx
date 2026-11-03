@@ -10,6 +10,7 @@ import { ModifyCard } from "./modify-card";
 import z from "zod";
 import { productValidator } from "@/zod-validator/product-validator";
 import { ImageUploadController } from "@/components/form/image-upload-controller";
+import { TagsController } from "@/components/form/tags-controller";
 
 export const OrganizationCard = () => {
   const { control } = useFormContext<z.infer<typeof productValidator>>();
@@ -63,6 +64,13 @@ export const OrganizationCard = () => {
           endpoint="featuredImage"
           mode="single"
           title="Thumbnail Images"
+        />
+
+        <TagsController
+          control={control}
+          name="tags"
+          title="Tags"
+          placeholder="e.g. Organic"
         />
       </FieldGroup>
     </ModifyCard>

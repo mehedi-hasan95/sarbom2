@@ -1,0 +1,171 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "3106c9b5-b90e-4c8a-86bc-1a9ece1d7c54",
+  "prevIds": [
+    "583ac2c5-b795-4561-b437-071fcf7a8ee7"
+  ],
+  "footprints": [
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "product_variants",
+        "sale_price"
+      ],
+      "writes": [
+        "s|col|public.product_variants.sale_price",
+        "n|col|public.product_variants.sale_price",
+        "e|col|public.product_variants.sale_price"
+      ],
+      "reads": [
+        "n|tbl|public.product_variants",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "product_variants",
+        "stock"
+      ],
+      "writes": [
+        "s|col|public.product_variants.stock",
+        "n|col|public.product_variants.stock",
+        "e|col|public.product_variants.stock"
+      ],
+      "reads": [
+        "n|tbl|public.product_variants",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "products",
+        "sale_price"
+      ],
+      "writes": [
+        "s|col|public.products.sale_price",
+        "n|col|public.products.sale_price",
+        "e|col|public.products.sale_price"
+      ],
+      "reads": [
+        "n|tbl|public.products",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "products",
+        "tags"
+      ],
+      "writes": [
+        "s|col|public.products.tags",
+        "n|col|public.products.tags",
+        "e|col|public.products.tags"
+      ],
+      "reads": [
+        "n|tbl|public.products",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "drop_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "product_sizes",
+        "compare_at_price"
+      ],
+      "writes": [
+        "s|col|public.product_sizes.compare_at_price",
+        "n|col|public.product_sizes.compare_at_price",
+        "e|col|public.product_sizes.compare_at_price"
+      ],
+      "reads": [
+        "n|tbl|public.product_sizes",
+        "n|sch|public"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "product_variants",
+        "name": "sale_price",
+        "type": "numeric(12,2)",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "product_variants",
+        "name": "stock",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "products",
+        "name": "sale_price",
+        "type": "numeric(12,2)",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "products",
+        "name": "tags",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 1,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "drop",
+      "key": "columns\u0000[\"public\",\"product_sizes\",\"compare_at_price\"]"
+    }
+  ]
+}

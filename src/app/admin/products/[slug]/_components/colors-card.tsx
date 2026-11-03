@@ -24,45 +24,61 @@ import { ModifyCard } from "./modify-card";
 
 export const ColorsCard = () => {
   const { control, getValues, setValue } =
-    useFormContext<z.infer<typeof productValidator>>();
+    useFormContext<z.input<typeof productValidator>>();
   const colors = useFieldArray({ control, name: "colors" });
 
   const isVariant = useWatch({ control, name: "isVariant" });
 
   function addColor() {
-    const hadColors = colors.fields.length > 0;
     const id = crypto.randomUUID();
+    const hadColors = getValues("colors").length > 0;
+
+    // read sizes BEFORE appending so we work from the current values
+    const sizes = getValues("sizes");
+
     colors.append({ id, name: "", hex: "", images: [] });
 
-    // keep every size's variants in step with the colors list
-    getValues("sizes").forEach((size, si) => {
-      if (!hadColors) {
-        // the placeholder "no color" variant becomes the first color's variant
-        const only = size.variants[0];
-        if (size.variants.length === 1 && only && only.colorKey === null) {
-          setValue(`sizes.${si}.variants.0.colorKey`, id);
-        }
-      } else {
-        setValue(`sizes.${si}.variants`, [
-          ...size.variants,
-          emptyVariant({ colorKey: id }),
-        ]);
-      }
+    sizes.forEach((size, si) => {
+      const only = size.variants[0];
+      const isPlaceholder =
+        !hadColors &&
+        size.variants.length === 1 &&
+        !!only &&
+        only.colorId === null;
+
+      // always replace the whole variants array so the nested
+      // useFieldArray in SizeCard gets notified
+      const variants = isPlaceholder
+        ? [{ ...only, colorId: id, sizeId: size.id }]
+        : [...size.variants, emptyVariant({ colorId: id, sizeId: size.id })];
+
+      setValue(`sizes.${si}.variants`, variants, {
+        shouldDirty: true,
+        shouldTouch: true,
+      });
     });
   }
 
   function removeColor(index: number) {
-    const removed = colors.fields[index];
-    if (!removed) return;
-    const remaining = colors.fields.length - 1;
+    // read the id from form values, not from `colors.fields`
+    // (fields[i].id is RHF's generated key, not your UUID)
+    const removedId = getValues(`colors.${index}.id`);
+    if (!removedId) return;
+
+    const remaining = getValues("colors").length - 1;
+    const sizes = getValues("sizes");
+
     colors.remove(index);
 
-    getValues("sizes").forEach((size, si) => {
-      let next = size.variants.filter((v) => v.colorKey !== removed.id);
-      if (next.length === 0 && remaining === 0) next = [emptyVariant({})];
-      setValue(`sizes.${si}.variants`, next);
+    sizes.forEach((size, si) => {
+      let next = size.variants.filter((v) => v.colorId !== removedId);
+      if (next.length === 0 && remaining === 0) {
+        next = [emptyVariant({ sizeId: size.id })];
+      }
+      setValue(`sizes.${si}.variants`, next, { shouldDirty: true });
     });
   }
+
   return (
     <ModifyCard
       title="Colors and images"
@@ -95,7 +111,7 @@ export const ColorsCard = () => {
                             value={
                               /^#[0-9a-f]{6}$/i.test(field.value ?? "")
                                 ? field.value!
-                                : ""
+                                : "#000000"
                             }
                             onChange={(e) => field.onChange(e.target.value)}
                             className="h-9 w-12 shrink-0 cursor-pointer rounded-md border bg-transparent p-1"
@@ -132,7 +148,6 @@ export const ColorsCard = () => {
               </div>
             )}
 
-            {/* <ColorImages index={i} /> */}
             <ImageUploadController
               control={control}
               endpoint="productImage"

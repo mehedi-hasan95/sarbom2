@@ -17,18 +17,19 @@ export const SizesCard = () => {
 
   const isVariant = useWatch({ control, name: "isVariant" });
 
-  const id = crypto.randomUUID();
-
   function addSize() {
+    const id = crypto.randomUUID();
     const colors = getValues("colors");
+
     sizes.append({
       id,
       size: "",
       variants: colors.length
-        ? colors.map((c) => emptyVariant({ colorKey: c.id }))
-        : [emptyVariant({})],
+        ? colors.map((c) => emptyVariant({ colorId: c.id, sizeId: id }))
+        : [emptyVariant({ sizeId: id })],
     });
   }
+
   return (
     <ModifyCard
       title="Sizes, pricing and stock"
