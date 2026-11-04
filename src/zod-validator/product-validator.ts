@@ -21,7 +21,7 @@ export const productValidator = z
     thumbnail: z.string().optional(),
     price: z.preprocess(
       (val) => (val === "" || val === null ? undefined : val),
-      z.coerce.number().nonnegative(),
+      z.coerce.number().nonnegative().optional(),
     ),
     salePrice: z.preprocess((val) => {
       if (val === "" || val === null || val === undefined) {
@@ -71,14 +71,18 @@ export const productValidator = z
 
         variants: z.array(
           z.object({
-            sku: z.union([
-              z.literal(""),
-              z
-                .string()
-                .trim()
-                .max(64, "SKU is too long")
-                .regex(SKU_REGEX, "Use A-Z, 0-9 and hyphens, e.g. TEE-M-BLU"),
-            ]),
+            sku: z
+              .union([
+                z.literal(""),
+                z
+                  .string()
+                  .trim()
+                  .max(64, "SKU is too long")
+                  .regex(SKU_REGEX, "Use A-Z, 0-9 and hyphens, e.g. TEE-M-BLU"),
+              ])
+              .transform((value) => value || null)
+              .optional()
+              .nullable(),
             colorId: z.string().min(1).nullable(),
             sizeId: z.string().min(1).nullable(),
             price: z.preprocess((val) => {

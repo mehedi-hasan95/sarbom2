@@ -61,6 +61,7 @@ export const CreatableCombobox = ({
           }
         }}
         showClear={!!value && !inputValue}
+        className={"w-full"}
       />
 
       <ComboboxContent>

@@ -1,26 +1,17 @@
 "use client";
 
-import {
-  Controller,
-  useFieldArray,
-  useFormContext,
-  useWatch,
-} from "react-hook-form";
+import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/ui/field";
+import { FieldGroup } from "@/components/ui/field";
 import { InputController } from "@/components/form/input-controller";
-import { Input } from "@/components/ui/input";
 import { ImageUploadController } from "@/components/form/image-upload-controller";
 import z from "zod";
 import { productValidator } from "@/zod-validator/product-validator";
 import { emptyVariant } from "./create-product-form";
 import { ModifyCard } from "./modify-card";
+import { ColorComboboxController } from "@/components/form/color-combobox-controller";
+import { colorOptions } from "@/constants/color-size";
 
 export const ColorsCard = () => {
   const { control, getValues, setValue } =
@@ -97,42 +88,13 @@ export const ColorsCard = () => {
                     title="Color Name (optional)"
                     placeholder="Midnight blue"
                   />
-                  <Controller
+
+                  <ColorComboboxController
                     name={`colors.${i}.hex`}
                     control={control}
-                    render={({ field, fieldState }) => (
-                      <Field data-invalid={fieldState.invalid}>
-                        <FieldLabel htmlFor={`color-${i}-hex`}>Hex</FieldLabel>
-
-                        <div className="flex gap-2">
-                          <input
-                            type="color"
-                            aria-label="Pick a color"
-                            value={
-                              /^#[0-9a-f]{6}$/i.test(field.value ?? "")
-                                ? field.value!
-                                : "#000000"
-                            }
-                            onChange={(e) => field.onChange(e.target.value)}
-                            className="h-9 w-12 shrink-0 cursor-pointer rounded-md border bg-transparent p-1"
-                          />
-
-                          <Input
-                            {...field}
-                            value={field.value ?? ""}
-                            id={`color-${i}-hex`}
-                            aria-invalid={fieldState.invalid}
-                            placeholder="e.g. #191970"
-                            className="font-mono"
-                            autoComplete="off"
-                          />
-                        </div>
-
-                        {fieldState.invalid && (
-                          <FieldError errors={[fieldState.error]} />
-                        )}
-                      </Field>
-                    )}
+                    options={colorOptions}
+                    title="HEX"
+                    placeholder="Select or create a hex code"
                   />
                 </div>
                 {colors.fields.length > 1 && (

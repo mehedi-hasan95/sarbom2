@@ -1,0 +1,1 @@
+ALTER TABLE "products" ALTER COLUMN "short_desc" DROP NOT NULL;

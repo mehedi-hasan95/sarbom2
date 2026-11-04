@@ -53,12 +53,12 @@ export const products = snakeCase.table(
     id: uuid().primaryKey().defaultRandom(),
     name: text().notNull(),
     slug: text().notNull().unique(),
-    shortDesc: varchar({ length: 200 }).notNull(),
+    shortDesc: varchar({ length: 200 }),
     description: text().notNull(),
     specification: jsonb().$type<SPECIFICATION>(),
-    thumbnail: text().references(() => images.url, { onDelete: "cascade" }),
-    price: numeric({ precision: 12, scale: 2 }),
-    salePrice: numeric({ precision: 12, scale: 2 }),
+    thumbnail: text(),
+    price: numeric({ precision: 12, scale: 2, mode: "number" }),
+    salePrice: numeric({ precision: 12, scale: 2, mode: "number" }),
     tags: text().array(),
     categorySlug: text()
       .notNull()
@@ -129,7 +129,7 @@ export const productColors = snakeCase.table(
       .default(sql`'{}'::text[]`),
   },
   (t) => [
-    unique("product_colors_unique").on(t.productSlug, t.hex).nullsNotDistinct(),
+    unique("product_colors_unique").on(t.productSlug, t.hex),
     index("product_colors_product_idx").on(t.productSlug),
   ],
 );
@@ -151,14 +151,12 @@ export const productVariants = snakeCase.table(
     }),
     sku: text().unique(),
 
-    price: numeric({ precision: 12, scale: 2 }),
-    salePrice: numeric({ precision: 12, scale: 2 }),
+    price: numeric({ precision: 12, scale: 2, mode: "number" }),
+    salePrice: numeric({ precision: 12, scale: 2, mode: "number" }),
     stock: integer(),
   },
   (t) => [
-    unique("product_variants_unique")
-      .on(t.sizeId, t.colorId)
-      .nullsNotDistinct(),
+    unique("product_variants_unique").on(t.sizeId, t.colorId),
     index("product_variants_size_idx").on(t.sizeId),
     index("product_variants_color_idx").on(t.colorId),
   ],

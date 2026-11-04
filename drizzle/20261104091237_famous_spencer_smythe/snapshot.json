@@ -1,0 +1,36 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "83867b0f-b2d4-4f8b-90e2-925f06d028c5",
+  "prevIds": [
+    "cac2a81a-b375-4bdb-a0a1-231d56587bad"
+  ],
+  "footprints": [
+    {
+      "statementType": "drop_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "products"
+      ],
+      "writes": [
+        "s|fk|public.products.products_thumbnail_images_url_fkey",
+        "n|fk|public.products.products_thumbnail_images_url_fkey",
+        "e|fk|public.products.products_thumbnail_images_url_fkey",
+        "n|con|public.products.products_thumbnail_images_url_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.products",
+        "n|sch|public",
+        "e|col|public.products.thumbnail"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "drop",
+      "key": "fks\u0000[\"public\",\"products\",\"products_thumbnail_images_url_fkey\"]"
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "cac2a81a-b375-4bdb-a0a1-231d56587bad",
+  "prevIds": [
+    "3106c9b5-b90e-4c8a-86bc-1a9ece1d7c54"
+  ],
+  "footprints": [
+    {
+      "statementType": "alter_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "products",
+        "short_desc"
+      ],
+      "writes": [
+        "s|colprop|public.products.short_desc.notNull"
+      ],
+      "reads": [
+        "n|tbl|public.products",
+        "n|sch|public",
+        "n|col|public.products.short_desc"
+      ],
+      "sqlHash": "09b73178d00020a5"
+    }
+  ],
+  "deltas": [
+    {
+      "op": "alter",
+      "key": "columns\u0000[\"public\",\"products\",\"short_desc\"]",
+      "set": {
+        "notNull": false
+      }
+    }
+  ]
+}

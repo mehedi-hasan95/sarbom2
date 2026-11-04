@@ -1,0 +1,43 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "bce7edc4-7256-4ded-8d91-a49eacd9e008",
+  "prevIds": [
+    "83867b0f-b2d4-4f8b-90e2-925f06d028c5"
+  ],
+  "footprints": [
+    {
+      "statementType": "alter_unique",
+      "statementTarget": [
+        "table",
+        "public",
+        "product_variants"
+      ],
+      "writes": [
+        "s|uq|public.product_variants.product_variants_unique"
+      ],
+      "reads": [
+        "n|tbl|public.product_variants",
+        "n|sch|public",
+        "n|col|public.product_variants.size_id",
+        "n|col|public.product_variants.color_id",
+        "e|col|public.product_variants.size_id",
+        "e|col|public.product_variants.color_id"
+      ],
+      "sharedWrites": [
+        "e|uniqueness|public.product_variants.color_id.size_id"
+      ],
+      "sqlHash": "a8c986b5ae42f41a"
+    }
+  ],
+  "deltas": [
+    {
+      "op": "alter",
+      "key": "uniques\u0000[\"public\",\"product_variants\",\"product_variants_unique\"]",
+      "set": {
+        "nullsNotDistinct": false
+      }
+    }
+  ]
+}

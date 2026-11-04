@@ -1,0 +1,1 @@
+ALTER TABLE "products" DROP CONSTRAINT "products_thumbnail_images_url_fkey";

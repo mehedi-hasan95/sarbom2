@@ -1,0 +1,43 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "194c58c4-be36-4761-a2d4-58e455aa7b5a",
+  "prevIds": [
+    "bce7edc4-7256-4ded-8d91-a49eacd9e008"
+  ],
+  "footprints": [
+    {
+      "statementType": "alter_unique",
+      "statementTarget": [
+        "table",
+        "public",
+        "product_colors"
+      ],
+      "writes": [
+        "s|uq|public.product_colors.product_colors_unique"
+      ],
+      "reads": [
+        "n|tbl|public.product_colors",
+        "n|sch|public",
+        "n|col|public.product_colors.product_slug",
+        "n|col|public.product_colors.hex",
+        "e|col|public.product_colors.product_slug",
+        "e|col|public.product_colors.hex"
+      ],
+      "sharedWrites": [
+        "e|uniqueness|public.product_colors.hex.product_slug"
+      ],
+      "sqlHash": "73d3d83fdef58aab"
+    }
+  ],
+  "deltas": [
+    {
+      "op": "alter",
+      "key": "uniques\u0000[\"public\",\"product_colors\",\"product_colors_unique\"]",
+      "set": {
+        "nullsNotDistinct": false
+      }
+    }
+  ]
+}

@@ -9,13 +9,14 @@ import { OrganizationCard } from "./organization-card";
 import { Field, FieldError } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
-import { createProductAction } from "@/action/products-action-2";
+import { createProductAction } from "@/action/products-action";
 import { LoadingButton } from "@/components/common/loading-button";
 import { useEffect, useState } from "react";
 import { ColorsCard } from "./colors-card";
 import { SizesCard } from "./sizes-card";
 import { DetailsCard } from "./details-card";
 import { VariantCard } from "./variant-card";
+import { toast } from "sonner";
 
 export const emptyVariant = ({
   colorId = null,
@@ -113,15 +114,19 @@ export const CreateProductForm = () => {
   const { mutate, isPending } = useMutation({
     mutationFn: createProductAction,
     onSuccess: (data) => {
-      console.log("data: ", data);
+      if (data.error) {
+        toast.error(data.error);
+        return;
+      }
+      toast.success("Product create successfully");
     },
-    onError: (error) => {
-      console.log("error: ", error);
+    onError: () => {
+      toast.error("Something went wrong");
     },
   });
   function onSubmit(data: z.input<typeof productValidator>) {
-    // mutate(data);
-    console.log(data);
+    mutate(data);
+    // console.log(data);
   }
   return (
     <FormProvider {...form}>
